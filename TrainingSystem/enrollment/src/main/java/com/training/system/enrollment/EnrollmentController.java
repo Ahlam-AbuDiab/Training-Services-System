@@ -15,25 +15,45 @@ public class EnrollmentController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @PostMapping("/register/{userId}")
-    public ResponseEntity<Map<String, Object>> register(@PathVariable String userId) {
+    @PostMapping("/register/{userId}/{courseId}")
+    public ResponseEntity<Map<String, Object>> register(
+        @PathVariable String userId,
+        @PathVariable String courseId) {
 
-        String url = "http://localhost:8081/api/users/" + userId + "/validate";
+    String userUrl =
+            "http://localhost:8081/api/users/" + userId + "/validate";
 
-        Map userResponse = restTemplate.getForObject(url, Map.class);
+    String courseUrl =
+            "http://localhost:8083/api/courses/" + courseId + "/availability";
 
-        Map<String, Object> response = new HashMap<>();
+    Map userResponse =
+            restTemplate.getForObject(userUrl, Map.class);
 
-        if (userResponse != null && Boolean.TRUE.equals(userResponse.get("valid"))) {
-            response.put("message", "Enrollment successful");
-            response.put("userId", userId);
-            response.put("status", "SUCCESS");
-        } else {
-            response.put("message", "Enrollment failed: invalid user");
-            response.put("userId", userId);
-            response.put("status", "FAILED");
-        }
+    Map courseResponse =
+            restTemplate.getForObject(courseUrl, Map.class);
 
-        return ResponseEntity.ok(response);
+    Map<String, Object> response = new HashMap<>();
+
+    boolean validUser =
+            userResponse != null &&
+            Boolean.TRUE.equals(userResponse.get("valid"));
+
+    boolean availableCourse =
+            courseResponse != null &&
+            Boolean.TRUE.equals(courseResponse.get("available"));
+
+    if(validUser && availableCourse){
+
+        response.put("message", "Enrollment successful");
+        response.put("userId", userId);
+        response.put("courseId", courseId);
+        response.put("status", "SUCCESS");
+
+    } else {
+
+        response.put("message", "Enrollment failed");
+        response.put("status", "FAILED");
     }
+
+    return ResponseEntity.ok(response);
 }
