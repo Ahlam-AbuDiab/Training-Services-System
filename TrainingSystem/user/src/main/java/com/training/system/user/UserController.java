@@ -14,7 +14,7 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> validateUser(@PathVariable String id) {
         Map<String, Object> response = new HashMap<>();
 
-        if ("123".equals(id) || "200".equals(id)) {
+        if ("220223260".equals(id) || "200".equals(id)) {
             response.put("userId", id);
             response.put("valid", true);
             response.put("name", "Ahlam Abu Diab");
