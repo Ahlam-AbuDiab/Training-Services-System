@@ -20,7 +20,7 @@ jobs:
           java-version: 17
 
       - name: Build user service
-        working-directory: ./user
+        working-directory: ./TrainingSystem/user
         run: ./mvnw clean package
 
       - name: Login to Docker Hub
@@ -30,7 +30,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        working-directory: ./user
+        working-directory: ./TrainingSystem/user
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest .
 
       - name: Push Docker image
