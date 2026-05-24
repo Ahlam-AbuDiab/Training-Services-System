@@ -17,43 +17,35 @@ public class EnrollmentController {
 
     @PostMapping("/register/{userId}/{courseId}")
     public ResponseEntity<Map<String, Object>> register(
-        @PathVariable String userId,
-        @PathVariable String courseId) {
+            @PathVariable String userId,
+            @PathVariable String courseId) {
 
-    String userUrl =
-            "http://localhost:8081/api/users/" + userId + "/validate";
+        String userUrl = "http://localhost:8081/api/users/" + userId + "/validate";
+        String courseUrl = "http://localhost:8083/api/courses/" + courseId + "/availability";
 
-    String courseUrl =
-            "http://localhost:8083/api/courses/" + courseId + "/availability";
+        Map userResponse = restTemplate.getForObject(userUrl, Map.class);
+        Map courseResponse = restTemplate.getForObject(courseUrl, Map.class);
 
-    Map userResponse =
-            restTemplate.getForObject(userUrl, Map.class);
+        Map<String, Object> response = new HashMap<>();
 
-    Map courseResponse =
-            restTemplate.getForObject(courseUrl, Map.class);
+        boolean validUser = userResponse != null &&
+                Boolean.TRUE.equals(userResponse.get("valid"));
 
-    Map<String, Object> response = new HashMap<>();
+        boolean availableCourse = courseResponse != null &&
+                Boolean.TRUE.equals(courseResponse.get("available"));
 
-    boolean validUser =
-            userResponse != null &&
-            Boolean.TRUE.equals(userResponse.get("valid"));
+        if (validUser && availableCourse) {
+            response.put("message", "Enrollment successful");
+            response.put("userId", userId);
+            response.put("courseId", courseId);
+            response.put("status", "SUCCESS");
+        } else {
+            response.put("message", "Enrollment failed");
+            response.put("userId", userId);
+            response.put("courseId", courseId);
+            response.put("status", "FAILED");
+        }
 
-    boolean availableCourse =
-            courseResponse != null &&
-            Boolean.TRUE.equals(courseResponse.get("available"));
-
-    if(validUser && availableCourse){
-
-        response.put("message", "Enrollment successful");
-        response.put("userId", userId);
-        response.put("courseId", courseId);
-        response.put("status", "SUCCESS");
-
-    } else {
-
-        response.put("message", "Enrollment failed");
-        response.put("status", "FAILED");
+        return ResponseEntity.ok(response);
     }
-
-    return ResponseEntity.ok(response);
 }
